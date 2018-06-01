@@ -137,13 +137,13 @@ namespace casper
             Parser                parser_;                      //!< Term gramar parser
             FormulaList           formulas_;                    //!< Array with pointers to all formulas
             SymbolTable           reference_symtab_;            //!< Holds the constant terms created by the loading process
+            SymbolTable           line_values_;                 //!< Keeps literals of the lines table
             StringSet             precedents_;                  //!< List of independent terms used by the formulas
             StringHash            aliases_;                     //!< Maps the cells to name mappings
             ColumnNameIndex       column_name_index_;           //!< Holds the names of the columns indexed by col number
             Formula*              temp_formula_;                //!< Temp holder for formula being loaded in dependency analysis
             Formula*              current_formula_;             //!< Formula being calculated in calculation phase
             StringHash            name_to_cell_aliases_;        //!< Maps the formulas names to cells refs
-            SymbolTable           line_values_;                 //!< Keeps literals of the lines table
             TableHash             tables_;                      //!< Holds the engine lookup tables
             ColumnHash            columns_;                     //!< Holds the definition of lines table columns
             SymbolTable           sum_criterias_;               //!< List of criterias for SUMIFS (we only handle one at a time)
@@ -274,6 +274,7 @@ namespace casper
              */
             FormulaList      getFormulas();
             SymbolTable      getRefSymtab();
+            SymbolTable      getLineValues();
             SymbolTable      getSymtab();
             StringSet        getPrecedents();
             StringHash       getAliases();
@@ -352,6 +353,10 @@ namespace casper
         inline SymbolTable See::getRefSymtab()
         {
             return reference_symtab_;
+        }
+        inline SymbolTable See::getLineValues()
+        {
+            return line_values_;
         }
         inline SymbolTable See::getSymtab()
         {

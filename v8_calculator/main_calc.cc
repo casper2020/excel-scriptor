@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
         args[2] = v8::String::NewFromUtf8(context->GetIsolate(), arg2, v8::NewStringType::kNormal).ToLocalChecked();
 
 
-        for(int k=0; k<5; k++){
+        for(int k=0; k<20; k++){
           for(int kk=0; kk<1; kk++){
             for(int i=1; i<21; i++){
                 std::string cod_func = std::to_string(i);
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
                         v8::String::Utf8Value str_3(js_result);
                         const char* cstr2 = ToCString(str_3);
                         if(cstr2[0]!='0') printf("ERROR in %s, COD_FUNC = %d\n", cstr2, i);
-                        else printf("%s\n", cstr);
+                        //else printf("%s\n", cstr);
                     }
                 }
 

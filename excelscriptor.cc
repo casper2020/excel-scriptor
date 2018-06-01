@@ -4,11 +4,23 @@
 #include "casper/js_compiler/interpreter.h"
 #include "casper/see/see.h"
 
-void getInitVars(std::map<std::string, casper::Term> ref_symtab){
+void getInitVars(std::map<std::string, casper::Term> ref_symtab, std::map<std::string, casper::Term> line_values){
 
     std::stringstream output;
 
     for (auto const& x : ref_symtab) {
+        if(x.second.GetType()==1)
+            output << "var " << x.first << " = { x : "
+            << x.second.GetNumber() << ", y : \"" << x.first << "\" };\n";
+        else if(x.second.GetType()==2)
+            output << "var " << x.first << " = { x : \""
+            << x.second.GetText() << "\", y : \"" << x.first << "\" };\n";
+        else
+            output << "var " << x.first << " = { x : "
+            << x.second.GetBoolean() << ", y : \"" << x.first << "\" };\n";
+    }
+
+    for (auto const& x : line_values) {
         if(x.second.GetType()==1)
             output << "var " << x.first << " = { x : "
             << x.second.GetNumber() << ", y : \"" << x.first << "\" };\n";
@@ -213,10 +225,12 @@ void compileModelV8(std::vector<casper::see::Formula*> formula_list){
 void printTest(){
     casper::js_compiler::Interpreter teste;
 
-    const std::string& input3  = "TESTE=5+5";
+    const std::string& input3  = "SUMIF(FICHA_FUNC[employee_id],\">1000\" & FICHA_FUNC[salary_amount])";
+    const std::string& input4  = "D573=\"No caso de cessação de contratos sem termo celebrados entre 01/11/2011 e 30/09/2013,  a compensação corresponderá \"&\" (A) a 20 dias de RB (e diuturnidades, se aplicável), por cada ano completo de duração do contrato de trabalho (ou fracção de ano, na respectiva proporção) até  30/09/2013; \"&\"(B) i)18 dias de RB e diuturnidades por cada ano completo de antiguidade, no que respeita aos 3 primeiros anos de duração do contrato; ii) 12 dias de RB e diuturnidades por cada ano completo de antiguidade, nos anos subsequentes.\"&\" LIMITES:  Caso a compensação calculada com referência a 30 de Setembro de 2013 (A) , seja superior a 12 vezes a retribuição base e diuturnidades do trabalhador ou a 240 vezes a RMMG (\" & V_LIM_240XORDENADO_MIN_NAC & \"€), a compensação devida estará apurada nesta fase, não havendo que avançar para as fase (B).\nSe a compensação for inferior aos valores indicados passar-se-á para a fase B, sempre tendo em consideração aquele limite máximo\"";
 
     try{
         printf("3: %s\n", teste.Convert(input3).c_str());
+        printf("4: %s\n", teste.Convert(input4).c_str());
     }catch (osal::Exception& a_exception){
         std::cout << a_exception.Message() << "\n";
     }
@@ -244,6 +258,8 @@ int main() {
 
     std::map<std::string, casper::Term> ref_symtab = see->getRefSymtab();
 
+    std::map<std::string, casper::Term> line_values = see->getLineValues();
+
     std::vector<casper::see::Formula*> formula_list = see->getFormulas();
 
     std::map<std::string, std::string> alias_list = see->getAliases();
@@ -254,7 +270,7 @@ int main() {
     int first_row = see->table_header_row_;
 
 
-    getInitVars(ref_symtab);
+    getInitVars(ref_symtab,line_values);
 
     getAliases(alias_list);
 

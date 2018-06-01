@@ -67,7 +67,6 @@ function lines(a_this_row, a_col){
 
     var row = a_this_row.match(/\d+/)[0];
     var col = colName(getColumnRef(a_col)-1);
-
     var final_val = this[col+row]['x'];
     return final_val;
 }
@@ -78,7 +77,6 @@ function match(table, c1){
     for( var i=0; i<table.length; i++){
         if(table[i].name==c1) return i;
     }
-
     return "NaN";
 }
 
@@ -174,12 +172,11 @@ function sumifs(a_mode, a_table, a_column, criteria){
     if(a_mode == 'LINES'){
 
         var table = a_table;
-
         var sum_col_ = colName(getColumnRef(a_column)-1);
-        var sum_col = [];
         var criteria_col = {};
         var sumT = 0;
         var table_eval = [];
+        var rows = 0;
 
         for(var i=0; i<table.length; i++){
             table_eval[i] = this[table[i]];
@@ -188,11 +185,8 @@ function sumifs(a_mode, a_table, a_column, criteria){
         for(var i=0; i<table.length; i++){
             var val = table_eval[i].y;
             var val_c = val.replace(/[^a-zA-Z]+/g, '');
-            var val_d = parseInt(val.replace(/[^0-9\.]/g, ''), 10);
-            if(val_c == sum_col_) sum_col.push(val_d);
+            if(val_c == sum_col_) rows++;
         }
-
-        sum_col.sort(function(a, b){return a-b});
 
         for (var criteria_it in criteria){
             var criteria_col_ = colName(getColumnRef(criteria_it)-1);
@@ -200,17 +194,19 @@ function sumifs(a_mode, a_table, a_column, criteria){
             for(var i=0; i<table.length; i++){
                 var val = table_eval[i].y;
                 var val_c = val.replace(/[^a-zA-Z]+/g, '');
-                if(val_c == criteria_col_) criteria_col[criteria_it].push(table_eval[i].x);
+                if(val_c == criteria_col_){
+                    var obj_to_push = { x : table_eval[i].x, y : table_eval[i].y };
+                    criteria_col[criteria_it].push(obj_to_push);
+                }
             }
         }
 
-        var rows = sum_col.length;
-
         for(var row = 0; row < rows; row++) {
             var match = true;
+            var true_row;
             for (var criteria_it in criteria){
                 try {
-                    var a = criteria_col[criteria_it][row];
+                    var a = criteria_col[criteria_it][row].x;
                 } catch(err) { break; }
                 var b = criteria[criteria_it];
                 if(a != b){
@@ -219,10 +215,15 @@ function sumifs(a_mode, a_table, a_column, criteria){
                 }
             }
             if ( true == match ) {
-                sumT = sumT + this[sum_col_ + sum_col[row]]['x'];
+                //TODO: find out why there is undefined values here...
+                if(criteria_col[criteria_it][row] != undefined){
+                  true_row = (criteria_col[criteria_it][row].y).match(/\d+/)[0];
+                  if(this[sum_col_ + true_row] != undefined){
+                    sumT = sumT + this[sum_col_ + true_row]['x'];
+                  }
+                }
             }
         }
-
         if(isNaN(sumT)) return 0;
         else return sumT;
     }
@@ -273,11 +274,9 @@ function sumifs(a_mode, a_table, a_column, criteria){
 
 function sumif(a_mode, a_table, a_column_sum, a_column_crit, criteria){
 
-    if(a_mode == 'LINES'){
+    //TODO
+    if(a_mode == 'LINES') return "NaN";
 
-        return "NaN";
-
-    }
     else{
         var sumT = 0;
         var sum_col_index = 0;
@@ -321,7 +320,7 @@ function find(str, arg1, arg2){
 }
 
 function isError(val){
-    if(val == ("NaN" || undefined || null)) return true;
+    if(val == "NaN" || val == undefined || val == null || val == Infinity) return true;
     else return false;
 }
 
@@ -366,7 +365,6 @@ function getJsDateFromExcel(excelDate) {
     return new Date((excelDate - (25567 + 2))*86400*1000);
 }
 
-//TODO: TIPO , REFERENCIA , COD
 function getResults(){
     var t0 = performance.now();
 
